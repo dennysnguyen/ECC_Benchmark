@@ -13,7 +13,7 @@ The implementation uses the **micro-ecc** library to perform Key Generation, ECD
 ## Benchmark Results
 The following measurements were taken using an AXI Timer. Real-time values are calculated based on the 100 MHz system clock ($T = \text{Cycles} / 10^8$).
 
-| Bit Size | Official Curve Name | Operation | Cycles | Time (Seconds) |
+| Bit Size | Curve Name | Operation | Cycles | Time (Seconds) |
 | :--- | :--- | :--- | :--- | :--- |
 | **160-bit** | **secp160r1** | KeyGen | 60,126,979 | 0.60s |
 | | | Signing | 62,511,860 | 0.62s |
