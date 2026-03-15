@@ -1,6 +1,6 @@
 # Nexys A7 ECC Benchmarking (MicroBlaze)
 
-This project benchmarks the performance of Elliptic Curve Cryptography (ECC) on a 32-bit MicroBlaze soft-core processor. This is part of an investigation into the feasibility of secure communication within microgrid fault detection systems at Cal Poly Pomona.
+This project benchmarks the performance of Elliptic Curve Cryptography (ECC) on a 32-bit MicroBlaze soft-core processor.
 
 The implementation uses the **micro-ecc** library to perform Key Generation, ECDSA Signing, and ECDSA Verification across standard NIST prime curves.
 
