@@ -1,31 +1,33 @@
 # Nexys A7 ECC Benchmarking (MicroBlaze)
 
-This project benchmarks the performance of Elliptic Curve Cryptography (ECC) on a 32-bit MicroBlaze soft-core processor implemented on a Nexys A7 (Xilinx Artix-7) FPGA. 
+This project benchmarks the performance of Elliptic Curve Cryptography (ECC) on a 32-bit MicroBlaze soft-core processor. This is part of an investigation into the feasibility of secure communication within microgrid fault detection systems.
 
-The implementation uses the **micro-ecc** library to perform Key Generation and Signing operations across different NIST prime curves.
+The implementation uses the **micro-ecc** library to perform Key Generation, ECDSA Signing, and ECDSA Verification across NIST prime curves.
 
 ## Hardware Configuration
-* **FPGA:** Nexys A7 (XC7A100T)
+* **FPGA:** Nexys A7-100T
 * **Processor:** MicroBlaze (32-bit)
 * **Clock Frequency:** 100 MHz
-* **Timer:** AXI Timer (used for cycle-accurate benchmarking)
-* **Optimization Level:** `-O0` (Standard Debug)
 
 ## Benchmark Results
-The following results were measured in clock cycles and converted to real-time execution based on the 100 MHz system clock.
+The following measurements were taken using an AXI Timer. Real-time values are calculated based on the 100 MHz system clock ($T = \text{Cycles} / 10^8$).
 
-| Curve | Key Size | KeyGen (Cycles) | Time (Seconds) |
+| Curve Size | Operation | Cycles | Time (Seconds) |
 | :--- | :--- | :--- | :--- |
-| **secp160r1** | 160-bit | 60,126,993 | ~0.60s |
-| **secp192r1** | 192-bit | 94,129,093 | ~0.94s |
-| **secp256r1** | 256-bit | 234,176,863 | ~2.34s |
+| **160-bit** | KeyGen | 60,126,979 | 0.60s |
+| | Signing | 62,511,860 | 0.62s |
+| | Verify | 70,205,010 | 0.70s |
+| **192-bit** | KeyGen | 94,129,079 | 0.94s |
+| | Signing | 96,369,492 | 0.96s |
+| | Verify | 108,902,654 | 1.09s |
+| **256-bit** | KeyGen | 234,176,849 | 2.34s |
+| | Signing | 238,078,119 | 2.38s |
+| | Verify | 267,640,482 | 2.68s |
+
+## Summary of Operations
+1. **KeyGen:** Generates a private/public key pair. In ECC, the public key is a point on the curve calculated by multiplying the base point by the private key.
+2. **Signing:** Proves the identity of the sender and data integrity. Uses the private key to sign a hash of the data.
+3. **Verification:** The most computationally expensive step. Uses the sender's public key to mathematically prove the signature matches the data.
 
 ## Library Reference
-This project utilizes the **micro-ecc** library, a small and efficient ECDH and ECDSA implementation for 8-bit, 16-bit, and 32-bit processors.
-
 * **Original Library:** [kmackay/micro-ecc](https://github.com/kmackay/micro-ecc)
-
-## Files in this Repository
-* `src/main.c`: The benchmarking logic, including a dummy RNG for testing.
-* `system_top_wrapper.xsa`: The hardware platform specification exported from Vivado.
-* `lscript.ld`: Linker script defining the MicroBlaze memory map.

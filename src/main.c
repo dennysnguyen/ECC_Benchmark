@@ -8,7 +8,7 @@ typedef unsigned long u32;
 
 XTmrCtr Timer;
 
-// Dummy Random Number Generator
+// Dummy Random Number Generator for Benchmarking
 int dummy_rng(uint8_t *dest, unsigned size) {
     for (unsigned i = 0; i < size; ++i) {
         dest[i] = i; 
@@ -16,39 +16,45 @@ int dummy_rng(uint8_t *dest, unsigned size) {
     return 1; 
 }
 
+void run_benchmark(const struct uECC_Curve_t * curve, char* name) {
+    uint8_t public[64], private[32], hash[32] = {1}, sig[128];
+    u32 start, end;
+    int status;
+
+    xil_printf("\r\n--- Benchmarking %s ---\r\n", name);
+
+    // 1. Key Generation
+    XTmrCtr_Start(&Timer, 0);
+    start = XTmrCtr_GetValue(&Timer, 0);
+    status = uECC_make_key(public, private, curve);
+    end = XTmrCtr_GetValue(&Timer, 0);
+    xil_printf("  KeyGen: %lu cycles (Status: %d)\r\n", end - start, status);
+
+    // 2. Signing
+    start = XTmrCtr_GetValue(&Timer, 0);
+    status = uECC_sign(private, hash, 32, sig, curve);
+    end = XTmrCtr_GetValue(&Timer, 0);
+    xil_printf("  Signing: %lu cycles (Status: %d)\r\n", end - start, status);
+
+    // 3. Verification
+    start = XTmrCtr_GetValue(&Timer, 0);
+    status = uECC_verify(public, hash, 32, sig, curve);
+    end = XTmrCtr_GetValue(&Timer, 0);
+    xil_printf("  Verify: %lu cycles (Status: %d)\r\n", end - start, status);
+}
+
 int main() {
-    // 1. Initialize AXI Timer
     XTmrCtr_Initialize(&Timer, XPAR_XTMRCTR_0_BASEADDR);
     XTmrCtr_SetOptions(&Timer, 0, XTC_AUTO_RELOAD_OPTION);
     
-    // Arrays sized for the largest curve (256-bit)
-    uint8_t public_key[64];
-    uint8_t private_key[32];
-    u32 start, end;
-
     uECC_set_rng(&dummy_rng);
 
-    xil_printf("\r\n=== Nexys A7 ECC KeyGen Benchmark ===\r\n");
+    xil_printf("\r\n=== Nexys A7 ECC Full Suite Benchmark ===\r\n");
 
-    // --- Benchmark 1: 160-bit Curve ---
-    XTmrCtr_Start(&Timer, 0);
-    start = XTmrCtr_GetValue(&Timer, 0);
-    uECC_make_key(public_key, private_key, uECC_secp160r1());
-    end = XTmrCtr_GetValue(&Timer, 0);
-    xil_printf("160-bit (secp160r1): %lu cycles\r\n", end - start);
+    run_benchmark(uECC_secp160r1(), "160-bit");
+    run_benchmark(uECC_secp192r1(), "192-bit");
+    run_benchmark(uECC_secp256r1(), "256-bit");
 
-    // --- Benchmark 2: 192-bit Curve ---
-    start = XTmrCtr_GetValue(&Timer, 0);
-    uECC_make_key(public_key, private_key, uECC_secp192r1());
-    end = XTmrCtr_GetValue(&Timer, 0);
-    xil_printf("192-bit (secp192r1): %lu cycles\r\n", end - start);
-
-    // --- Benchmark 3: 256-bit Curve ---
-    start = XTmrCtr_GetValue(&Timer, 0);
-    uECC_make_key(public_key, private_key, uECC_secp256r1());
-    end = XTmrCtr_GetValue(&Timer, 0);
-    xil_printf("256-bit (secp256r1): %lu cycles\r\n", end - start);
-
-    xil_printf("Done!\r\n");
+    xil_printf("\r\nDone!\r\n");
     return 0;
 }
