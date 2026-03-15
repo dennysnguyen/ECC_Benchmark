@@ -1,0 +1,14 @@
+# Ignore build and compiled files
+build/
+Debug/
+Release/
+*.elf
+*.o
+*.obj
+*.d
+*.bit
+*.xsa
+
+# Ignore Vitis IDE hidden metadata
+.Xil/
+.metadata/
